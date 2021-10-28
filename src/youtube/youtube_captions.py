@@ -26,31 +26,39 @@ class YtService:
             srt_caption = caption.generate_srt_captions()
             return srt_caption
         except Exception as e:
-            return False
+            raise e
 
     def writeFile(self, content, output_dir):
-        f = open(output_dir, "w", encoding='utf-8')
-        f.write(content)
-        f.close()
-        return True
+        try:
+            f = open(output_dir, "w", encoding='utf-8')
+            f.write(content)
+            f.close()
+        except Exception as e:
+            raise e
 
     def downloadVideo(self, video_id, output_dir, filename):
         url = self.base_url + video_id
         yt = youtube(url)
-        print("downloading youtube video...")
-        video = yt.streams.filter(progressive=True, file_extension="mp4")
-        video.get_highest_resolution().download(
-            filename=filename, output_path=output_dir
-        )
-        print("finished downloading.")
-        return True
+        try:
+            print("downloading youtube video...")
+            video = yt.streams.filter(progressive=True, file_extension="mp4")
+            video.get_highest_resolution().download(
+                filename=filename, output_path=output_dir
+            )
+            print("finished downloading.")
+            return True
+        except Exception as e:
+            raise e
 
     def getSubtitleVideo(self, sub, font=None) -> SubtitlesClip:
-        generator = lambda txt: TextClip(
-            txt, font="Georgia-Regular", fontsize=40, color="yellow", bg_color="black"
-        )
-        subtitle = SubtitlesClip(sub, generator)
-        return subtitle
+        try:
+            generator = lambda txt: TextClip(
+                txt, font="Georgia-Regular", fontsize=40, color="yellow", bg_color="black"
+            )
+            subtitle = SubtitlesClip(sub, generator)
+            return subtitle
+        except Exception as e:
+            raise e
 
     def getTranslation(self, video_id, src = "en",target="ar"):
         # retrieve the available transcripts
@@ -64,14 +72,13 @@ class YtService:
         # Now we can write it out to a file.
         with open('your_filename.json', 'w', encoding='utf-8') as json_file:
             json_file.write(json_formatted)
-    
-    def JsonToXML(self):
-        pass
 
-if __name__ == "__main__":
-    sub = YtService()
-    xml = sub.getSrtCaption("PM101DvvG4Q")
-    # sub.xml_caption_to_srt(xml)
-    # # print(sub.downloadVideo(sub.base_url + "2-qx1i0yC3c", "input", "input.mp4"))
-    # # sub.getSubtitle(sub.base_url + "2-qx1i0yC3c")
-    # sub.getSubtitleVideo()
+    def generateOutput(self, input_clip, sub_clip):
+        try:
+            # Overlay the text clip on the first video clip
+            video = CompositeVideoClip([input_clip, sub_clip])
+            # Write the result to a file
+            video.write_videofile("youtube/output/output.mp4", fps=input_clip.fps)
+        except Exception as e:
+            raise e
+
